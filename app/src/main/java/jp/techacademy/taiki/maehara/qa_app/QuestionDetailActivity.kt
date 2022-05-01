@@ -96,18 +96,37 @@ class QuestionDetailActivity : AppCompatActivity() {
         val actionFavoriteItem = menu?.findItem(R.id.action_favorite)
 
         //お気に入り状態に応じて、アイコンを更新する。
-//        updateFavoriteItem(actionFavoriteItem)
+        updateFavoriteItem(actionFavoriteItem)
 
         return super.onCreateOptionsMenu(menu)
     }
 
-//    private fun updateFavoriteItem(actionFavoriteItem: MenuItem?) {
-//        if(FavoriteQuestion.findBy(favoriteQuestion.id) != null){
-//            actionFavoriteItem?.setIcon(R.drawable.ic_star)
-//        } else {
-//            actionFavoriteItem?.setIcon(R.drawable.ic_star_border)
-//        }
-//    }
+    private fun updateFavoriteItem(actionFavoriteItem: MenuItem?) {
+        if(mQuestion.favorite){
+            actionFavoriteItem?.setIcon(R.drawable.ic_star)
+        } else {
+            actionFavoriteItem?.setIcon(R.drawable.ic_star_border)
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_favorite -> {
+            if(mQuestion.favorite){
+//                showConfirmDeleteFavoriteDialog(item)
+            } else {
+                addFavorite(item)
+            }
+            true
+        }
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun addFavorite(item: MenuItem) {
+        mQuestion.favorite = true
+        updateFavoriteItem(item)
+    }
 
 
 }

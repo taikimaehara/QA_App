@@ -53,9 +53,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     answerArrayList.add(answer)
                 }
             }
+            val favorite = map["favorite"].toBoolean()
 
             val question = Question(title, body, name, uid, dataSnapshot.key ?: "",
-                mGenre, bytes, answerArrayList)
+                mGenre, bytes, answerArrayList, favorite)
             mQuestionArrayList.add(question)
             mAdapter.notifyDataSetChanged()
         }
@@ -108,8 +109,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if (mGenre == 0) {
                 Snackbar.make(view, getString(R.string.question_no_select_genre), Snackbar.LENGTH_LONG).show()
-            } else {
-
             }
             // ログイン済みのユーザーを取得する
             val user = FirebaseAuth.getInstance().currentUser

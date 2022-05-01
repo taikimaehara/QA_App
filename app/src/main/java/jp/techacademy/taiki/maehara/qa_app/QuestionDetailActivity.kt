@@ -3,6 +3,8 @@ package jp.techacademy.taiki.maehara.qa_app
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_question_detail.*
@@ -87,4 +89,25 @@ class QuestionDetailActivity : AppCompatActivity() {
         mAnswerRef = dataBaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(AnswersPATH)
         mAnswerRef.addChildEventListener(mEventListener)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_question_detail, menu)
+
+        val actionFavoriteItem = menu?.findItem(R.id.action_favorite)
+
+        //お気に入り状態に応じて、アイコンを更新する。
+//        updateFavoriteItem(actionFavoriteItem)
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+//    private fun updateFavoriteItem(actionFavoriteItem: MenuItem?) {
+//        if(FavoriteQuestion.findBy(favoriteQuestion.id) != null){
+//            actionFavoriteItem?.setIcon(R.drawable.ic_star)
+//        } else {
+//            actionFavoriteItem?.setIcon(R.drawable.ic_star_border)
+//        }
+//    }
+
+
 }

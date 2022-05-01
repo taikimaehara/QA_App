@@ -53,10 +53,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     answerArrayList.add(answer)
                 }
             }
-            val favorite = map["favorite"].toBoolean()
 
             val question = Question(title, body, name, uid, dataSnapshot.key ?: "",
-                mGenre, bytes, answerArrayList, favorite)
+                mGenre, bytes, answerArrayList)
             mQuestionArrayList.add(question)
             mAdapter.notifyDataSetChanged()
         }

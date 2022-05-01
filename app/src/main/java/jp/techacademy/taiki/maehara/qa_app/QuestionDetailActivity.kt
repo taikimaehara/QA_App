@@ -91,18 +91,23 @@ class QuestionDetailActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_question_detail, menu)
+        // ログイン済みのユーザーを取得する
+        val user = FirebaseAuth.getInstance().currentUser
 
-        val actionFavoriteItem = menu?.findItem(R.id.action_favorite)
+        if (user != null) {
+            menuInflater.inflate(R.menu.menu_question_detail, menu)
 
-        //お気に入り状態に応じて、アイコンを更新する。
-        updateFavoriteItem(actionFavoriteItem)
+            val actionFavoriteItem = menu?.findItem(R.id.action_favorite)
+
+            //お気に入り状態に応じて、アイコンを更新する。
+            updateFavoriteItem(actionFavoriteItem)
+        }
 
         return super.onCreateOptionsMenu(menu)
     }
 
     private fun updateFavoriteItem(actionFavoriteItem: MenuItem?) {
-        if(mQuestion.favorite){
+        if(true){
             actionFavoriteItem?.setIcon(R.drawable.ic_star)
         } else {
             actionFavoriteItem?.setIcon(R.drawable.ic_star_border)
@@ -111,7 +116,7 @@ class QuestionDetailActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_favorite -> {
-            if(mQuestion.favorite){
+            if(true){
 //                showConfirmDeleteFavoriteDialog(item)
             } else {
                 addFavorite(item)
@@ -124,7 +129,6 @@ class QuestionDetailActivity : AppCompatActivity() {
     }
 
     private fun addFavorite(item: MenuItem) {
-        mQuestion.favorite = true
         updateFavoriteItem(item)
     }
 

@@ -1,19 +1,35 @@
 package jp.techacademy.taiki.maehara.qa_app
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.Toast
+import androidx.preference.PreferenceManager
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.FirebaseError
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_answer_send.*
 import kotlinx.android.synthetic.main.activity_question_detail.*
+import kotlinx.android.synthetic.main.activity_question_send.*
+import kotlinx.android.synthetic.main.activity_question_send.progressBar
+import java.io.ByteArrayOutputStream
+import java.util.*
+import kotlin.collections.HashMap
 
 class QuestionDetailActivity : AppCompatActivity() {
 
     private lateinit var mQuestion: Question
     private lateinit var mAdapter: QuestionDetailListAdapter
     private lateinit var mAnswerRef: DatabaseReference
+    private lateinit var mFavoriteRef: DatabaseReference
 
     private val mEventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
@@ -107,20 +123,52 @@ class QuestionDetailActivity : AppCompatActivity() {
     }
 
     private fun updateFavoriteItem(actionFavoriteItem: MenuItem?) {
-        if(true){
-            actionFavoriteItem?.setIcon(R.drawable.ic_star)
-        } else {
-            actionFavoriteItem?.setIcon(R.drawable.ic_star_border)
-        }
+        val dataBaseReference = FirebaseDatabase.getInstance().reference
+
+        // user_id
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
+            dataBaseReference.child(FavoritesPATH).child(userId).child(mQuestion.questionUid).addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val map = snapshot.value as? Map<*, *> ?: ""
+                    if(map == ""){
+                        actionFavoriteItem?.setIcon(R.drawable.ic_star_border)
+                    }else{
+                        actionFavoriteItem?.setIcon(R.drawable.ic_star)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    actionFavoriteItem?.setIcon(R.drawable.ic_star_border)
+                }
+            })
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_favorite -> {
-            if(true){
-//                showConfirmDeleteFavoriteDialog(item)
-            } else {
-                addFavorite(item)
-            }
+            val dataBaseReference = FirebaseDatabase.getInstance().reference
+
+            // user_id
+            val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
+            dataBaseReference.child(FavoritesPATH).child(userId).child(mQuestion.questionUid)
+                .addListenerForSingleValueEvent(
+                    object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val map = snapshot.value as? Map<*, *> ?: ""
+                            if (map == "") {
+                                addFavorite(item)
+                            } else {
+                                deleteFavorite(item)
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Toast.makeText(baseContext,"失敗", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+
             true
         }
         else -> {
@@ -129,8 +177,76 @@ class QuestionDetailActivity : AppCompatActivity() {
     }
 
     private fun addFavorite(item: MenuItem) {
+
+        // user_id
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
+        val dataBaseReference = FirebaseDatabase.getInstance().reference
+
+        val mFavoriteRef = dataBaseReference.child(FavoritesPATH).child(userId).child((mQuestion.questionUid))
+
+        val data = HashMap<String, Any>()
+        val answerData = HashMap<String, ArrayList<Answer>>()
+
+        data["uid"] = mQuestion.uid
+        data["title"] = mQuestion.title
+        data["body"] = mQuestion.body
+        data["name"] = mQuestion.name
+
+        if (mQuestion.imageBytes.isNotEmpty()){
+            val imageBytes = mQuestion.imageBytes
+            val bitmapString = Base64.encodeToString(imageBytes, Base64.DEFAULT)
+            data["image"] = bitmapString
+        }
+
+        if (mQuestion.answers.isNotEmpty()){
+            data["answers"] = mQuestion.answers
+        }
+        data["genre"] = mQuestion.genre
+
+        mFavoriteRef.setValue(data)
+
         updateFavoriteItem(item)
+
+//        val answerData = HashMap<String, String>()
+//
+//        // UID
+//        answerData["uid"] = FirebaseAuth.getInstance().currentUser!!.uid
+//
+//        // 表示名
+//        // Preferenceから名前を取る
+//        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+//        val name = sp.getString(NameKEY, "")
+//        answerData["name"] = name!!
+//
+//        // 回答を取得する
+//        val answer = answerEditText.text.toString()
+//
+//        if (answer.isEmpty()) {
+//            // 回答が入力されていない時はエラーを表示するだけ
+//            Snackbar.make(v, getString(R.string.answer_error_message), Snackbar.LENGTH_LONG).show()
+//            return
+//        }
+//        answerData["body"] = answer
+//
+//        progressBar.visibility = View.VISIBLE
+//        answerRef.push().setValue(data, this)
+
+
     }
 
+    private fun deleteFavorite(item: MenuItem) {
+
+        // user_id
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
+        val dataBaseReference = FirebaseDatabase.getInstance().reference
+
+        val mFavoriteRef = dataBaseReference.child(FavoritesPATH).child(userId).child((mQuestion.questionUid))
+
+        mFavoriteRef.removeValue()
+
+        updateFavoriteItem(item)
+    }
 
 }

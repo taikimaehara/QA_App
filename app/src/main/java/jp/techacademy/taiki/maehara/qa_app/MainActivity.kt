@@ -109,6 +109,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (mGenre == 0) {
                 Snackbar.make(view, getString(R.string.question_no_select_genre), Snackbar.LENGTH_LONG).show()
             }
+
             // ログイン済みのユーザーを取得する
             val user = FirebaseAuth.getInstance().currentUser
 
@@ -126,6 +127,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val toggle = ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.app_name, R.string.app_name)
         drawer_layout.addDrawerListener(toggle)
+
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
@@ -154,6 +156,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if(mGenre == 0) {
             onNavigationItemSelected(navigationView.menu.getItem(0))
         }
+
+        // ログイン済みのユーザーを取得する
+        val user = FirebaseAuth.getInstance().currentUser
+
+        // ログインしていなければmenuからお気に入りを隠す
+        nav_view.menu.findItem(R.id.nav_favorite).isVisible = user != null
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
